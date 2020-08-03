@@ -11,9 +11,8 @@ import sys
 import os
 import rospy
 import math
-from PyQt4 import QtCore, QtGui
-from dji_sdk.msg import MissionWaypointTask, MissionWaypoint
-from dji_sdk.srv import MissionWpUpload, MissionWpAction, SDKControlAuthority
+from PyQt5 import QtCore, QtGui, QtWidgets
+from dji_osdk_ros.srv import SDKControlAuthority
 from sensor_msgs.msg import Joy, NavSatFix
 from std_msgs.msg import Header
 from threading import Thread
@@ -23,7 +22,7 @@ from flight_control_flag import *
 ROS_MASTER_URI = os.environ["ROS_MASTER_URI"]
 
 
-class WARA_Landing_GUI(QtGui.QWidget):
+class WARA_Landing_GUI(QtWidgets.QWidget):
     """ Base GUI class for sending commands to DJI Matrice """
     publishing = False
     thread_started = False
@@ -32,9 +31,9 @@ class WARA_Landing_GUI(QtGui.QWidget):
     axes = [0, 0, 0, 0, FLAG_ENU_VEL_YAWRATE]
 
     def __init__(self):
-        QtGui.QWidget.__init__(self)
+        QtWidgets.QWidget.__init__(self)
         self.setGeometry(0, 0, 700, 850)
-        self.main_layout = QtGui.QGridLayout(self)
+        self.main_layout = QtWidgets.QGridLayout(self)
 
         self.rate = rospy.Rate(10)
 
@@ -43,11 +42,11 @@ class WARA_Landing_GUI(QtGui.QWidget):
 
         self.ns = rospy.get_namespace()
 
-        btn_layout = QtGui.QGridLayout()
-        exit_btn = QtGui.QPushButton("Exit")
+        btn_layout = QtWidgets.QGridLayout()
+        exit_btn = QtWidgets.QPushButton("Exit")
         exit_btn.clicked.connect(self.closeEvent)
         exit_btn.setObjectName("menu_button")
-        auth_btn = QtGui.QPushButton("Authorize control")
+        auth_btn = QtWidgets.QPushButton("Authorize control")
         auth_btn.clicked.connect(self.authorize)
         auth_btn.setObjectName("menu_button")
 
@@ -55,32 +54,32 @@ class WARA_Landing_GUI(QtGui.QWidget):
         btn_layout.addWidget(exit_btn, 0, 1, 2, 1)
         self.main_layout.addLayout(btn_layout, 0, 0, 2, 4)
 
-        setting_layout = QtGui.QGridLayout()
+        setting_layout = QtWidgets.QGridLayout()
         mode_group = [['ENU position,\nyaw angle', 0],
                       ['ENU velocity,\nyawrate', 1],
                       ['Roll, pitch, \naltitude, yawrate', 2],
                       ['Roll, pitch, \nhdot, yawrate', 3]]
 
-        control_label = QtGui.QLabel('Control settings')
+        control_label = QtWidgets.QLabel('Control settings')
         control_label.setObjectName("label")
         setting_layout.addWidget(control_label, 0, 0, 1, 2)
         
-        ctrl_mode_group = QtGui.QButtonGroup(btn_layout)
+        ctrl_mode_group = QtWidgets.QButtonGroup(btn_layout)
         ctrl_mode_group.buttonClicked.connect(self.toggle_mode)
         j = 0
         for item in mode_group:
-            btn = QtGui.QRadioButton(item[0])
+            btn = QtWidgets.QRadioButton(item[0])
             btn.setChecked(j == self.ctrl_mode)
             ctrl_mode_group.addButton(btn, j)
             setting_layout.addWidget(btn, int(j/2)+1, (j%2)*3, 1, 3)
             j += 1
         i = int(j/2)+1
 
-        self.tabs = QtGui.QTabWidget()
-        tab1 = QtGui.QWidget()
-        tab2 = QtGui.QWidget()
-        tab3 = QtGui.QWidget()
-        tab4 = QtGui.QWidget()
+        self.tabs = QtWidgets.QTabWidget()
+        tab1 = QtWidgets.QWidget()
+        tab2 = QtWidgets.QWidget()
+        tab3 = QtWidgets.QWidget()
+        tab4 = QtWidgets.QWidget()
         self.tabs.resize(100, 300)
 
         # Add tabs
@@ -110,12 +109,12 @@ class WARA_Landing_GUI(QtGui.QWidget):
 
         j = 0
         for tab in [tab1, tab2, tab3, tab4]:
-            tab.layout = QtGui.QGridLayout()
+            tab.layout = QtWidgets.QGridLayout()
             tab.sliders = []
             for s in sliders[j]:
                 
-                slider = QtGui.QSlider(QtCore.Qt.Horizontal)
-                slider.text = QtGui.QLabel('0.0')
+                slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+                slider.text = QtWidgets.QLabel('0.0')
                 slider.axes = s[1]
                 slider.mode = j
                 if s[0] == 'Alt':
@@ -127,14 +126,14 @@ class WARA_Landing_GUI(QtGui.QWidget):
                 else:
                     slider.setRange(-100, 100)
                     slider.scale = s[2][1]/100.0
-                slider.setTickPosition(QtGui.QSlider.TicksBelow)
+                slider.setTickPosition(QtWidgets.QSlider.TicksBelow)
                 slider.valueChanged.connect(self.slider_moving)
                 slider.setStyleSheet('height: 50px;')
-                button = QtGui.QPushButton("Zero")
+                button = QtWidgets.QPushButton("Zero")
                 button.clicked.connect(self.slider_zero)
                 button.slider = slider
 
-                tab.layout.addWidget(QtGui.QLabel(s[0]), 3+i, 0, 1, 1)
+                tab.layout.addWidget(QtWidgets.QLabel(s[0]), 3+i, 0, 1, 1)
                 tab.layout.addWidget(slider.text, 3+i, 1, 1, 1)
                 tab.layout.addWidget(slider, 3+i, 2, 1, 4)
                 tab.layout.addWidget(button, 3+i, 6, 1, 1)
@@ -145,7 +144,7 @@ class WARA_Landing_GUI(QtGui.QWidget):
         setting_layout.addWidget(self.tabs, i+2, 0, 4, 8)
         i = i+2
 
-        publish_btn = QtGui.QPushButton("START publishing commands")
+        publish_btn = QtWidgets.QPushButton("START publishing commands")
         publish_btn.setStyleSheet('height: 50px; background: #c8c3cc; font-weight: 800; font-size: 20px;')
         publish_btn.clicked.connect(self.toggle_publish)
 
@@ -188,10 +187,6 @@ class WARA_Landing_GUI(QtGui.QWidget):
         else:
             rospy.loginfo("Running on local machine")
 
-        self.wp_upload_service = rospy.ServiceProxy(
-            "dji_sdk/mission_waypoint_upload", MissionWpUpload)
-        self.wp_action_service = rospy.ServiceProxy(
-            "dji_sdk/mission_waypoint_action", MissionWpAction)
         self.ctrl_auth_service = rospy.ServiceProxy(
             "dji_sdk/sdk_control_authority", SDKControlAuthority)
 
@@ -211,7 +206,7 @@ class WARA_Landing_GUI(QtGui.QWidget):
         self.ctrl_thread.join()
             
         rospy.loginfo("Exit application")
-        QtGui.QApplication.quit()
+        QtWidgets.QApplication.quit()
 
     def publish_cmd(self, value):
         rospy.logdebug("Start publishing commands")
@@ -299,7 +294,7 @@ if __name__ == '__main__':
     rospy.logwarn('IN MAIN')
     rospy.init_node('wara_landing_gui', anonymous=True, log_level=rospy.DEBUG)
 
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     w = WARA_Landing_GUI()  # QWidget()
     w.setStyleSheet("""
     .QSlider{
