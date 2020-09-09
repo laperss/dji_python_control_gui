@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>dji_flight_test</name>
+  <name>dji_python_control_gui</name>
   <version>0.1.0</version>
-  <description>For testing the DJI SDK commands in Python. </description>
+  <description>A GUI for testing the DJI SDK commands in Python. </description>
 
   <maintainer email="laperss@kth.se">Linnea Persson</maintainer>
 
