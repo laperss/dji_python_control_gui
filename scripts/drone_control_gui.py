@@ -10,7 +10,6 @@ from __future__ import print_function
 import sys
 import os
 import rospy
-import math
 from PyQt5 import QtCore, QtGui, QtWidgets
 from dji_osdk_ros.srv import SDKControlAuthority
 from sensor_msgs.msg import Joy, NavSatFix
