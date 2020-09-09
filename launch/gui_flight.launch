@@ -1,49 +1,14 @@
 <launch>
   <!-- Drone namespace prefix  -->
   <arg name="drone_ns" default="dji12"/>
-
+  
   <!-- Matrice 100 nodes -->
   <group ns="$(arg drone_ns)">
-    <node pkg="dji_flight_test" type="drone_control_gui.py" name="drone_gui"  output="screen">
+    <node pkg="dji_flight_test"
+          type="drone_control_gui.py"
+	  name="drone_gui"
+	  output="screen">
     </node>
-    <!--
-    <include file="$(find wara_ps_landing)/launch/record/record_dji.launch">
-      <arg name="ns" value="$(arg drone_ns)/dji_sdk" />
-    </include>
-    -->
   </group>
-
-
-  <node
-        pkg="rosbag"
-        type="record"
-        name="dji_bag"
-        args="-o  $(find dji_flight_test)/logs/dji_bag
-              /dji12/dji_sdk/gps_position
-              /dji12/dji_sdk/attitude
-              /dji12/dji_sdk/flight_control_setpoint_generic
-              /dji12/dji_sdk/rc
-              /dji12/dji_sdk/height_above_takeoff
-              /dji12/dji_sdk/imu
-	      /dji12/dji_sdk/battery_state
-	      /dji12/dji_sdk/flight_control_setpoint_ENUposition_yaw
-	      /dji12/dji_sdk/flight_control_setpoint_ENUvelocity_yawrate
-	      /dji12/dji_sdk/flight_control_setpoint_generic
-	      /dji12/dji_sdk/flight_control_setpoint_rollpitch_yawrate_zposition
-	      /dji12/dji_sdk/flight_status
-	      /dji12/dji_sdk/from_mobile_data
-	      /dji12/dji_sdk/gimbal_angle
-	      /dji12/dji_sdk/gimbal_angle_cmd
-	      /dji12/dji_sdk/gimbal_speed_cmd
-	      /dji12/dji_sdk/gps_health
-	      /dji12/dji_sdk/local_frame_ref
-	      /dji12/dji_sdk/local_position
-	      /dji12/dji_sdk/rtk_info_position
-	      /dji12/dji_sdk/rtk_info_yaw
-	      /dji12/dji_sdk/rtk_position
-	      /dji12/dji_sdk/rtk_velocity
-	      /dji12/dji_sdk/rtk_yaw
-	      /dji12/dji_sdk/velocity"/>
-
 
 </launch>

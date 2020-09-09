@@ -22,6 +22,7 @@ from flight_control_flag import *
 ROS_MASTER_URI = os.environ["ROS_MASTER_URI"]
 
 
+
 class WARA_Landing_GUI(QtWidgets.QWidget):
     """ Base GUI class for sending commands to DJI Matrice """
     publishing = False
@@ -151,20 +152,15 @@ class WARA_Landing_GUI(QtWidgets.QWidget):
         setting_layout.addWidget(publish_btn, 3+i+1, 0, 1, 8)
 
         self.main_layout.addLayout(setting_layout, 2, 0, 8, 5)
-        rospy.loginfo("GUI SETUP")
 
         if self.ctrl_mode == 0:
-            rospy.loginfo("ENU position + yaw mode chosen")
             self.axes[4] = FLAG_ENU_POS_YAW
         elif self.ctrl_mode == 1:
-            rospy.loginfo("ENU velocity + yawrate mode chosen")
             self.axes[4] = FLAG_ENU_VEL_YAWRATE
         elif self.ctrl_mode == 2:
-            rospy.loginfo("Roll, pitch, yaw rate + altitude mode chosen")
             self.axes[4] = FLAG_ROLL_PITCH_YAW
         elif self.ctrl_mode == 3:
-            rospy.loginfo("Roll, pitch, yaw rate, w")
-            self.axes[4] = FLAG_ROLL_PITCH_YAW_ANGLE
+            self.axes[4] = FLAG_ROLL_PITCH_YAW_RATE
         
         self.ctrl_thread = Thread(target=self.publish_cmd, args=(11,))        
         self.thread_started = True
@@ -172,16 +168,15 @@ class WARA_Landing_GUI(QtWidgets.QWidget):
         
 
     def init_publishers(self):
-        rospy.loginfo("Init publishers")
-        self.ctrl_pub = rospy.Publisher(
-            "dji_sdk/flight_control_setpoint_generic",
+        rospy.loginfo("Start publisher at 'flight_control_setpoint_generic'")
+        self.ctrl_pub = rospy.Publisher("flight_control_setpoint_generic",
             Joy, queue_size=10)
 
     def init_services(self):
-        rospy.loginfo("Init services")
         if not ROS_MASTER_URI == "http://localhost:11311":
             print("ROS_MASTER_URI = ", ROS_MASTER_URI)
-            rospy.wait_for_service("dji_sdk/mission_waypoint_upload")
+            rospy.loginfo("Waiting for service: dji_sdk/sdk_control_authority")
+            rospy.wait_for_service("dji_sdk/sdk_control_authority")
             rospy.loginfo("Running ROS with ROS_MASTER_URI %s" %
                           ROS_MASTER_URI)
         else:
@@ -190,8 +185,9 @@ class WARA_Landing_GUI(QtWidgets.QWidget):
         self.ctrl_auth_service = rospy.ServiceProxy(
             "dji_sdk/sdk_control_authority", SDKControlAuthority)
 
-
+        rospy.loginfo("Control authority service found at 'dji_sdk/sdk_control_authority'")
     def get_position(self):
+        rospy.loginfo("Wait for valid position...")
         msg = rospy.wait_for_message(
             "dji_sdk/gps_position", NavSatFix, 5.0)
         position = (msg.latitude, msg.longitude, msg.altitude)
