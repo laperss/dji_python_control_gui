@@ -73,6 +73,12 @@ FLAG_ROLL_PITCH_YAW_ANGLE = (VERTICAL_VELOCITY |
                              HORIZONTAL_BODY |
                              STABLE_DISABLE)
 
+FLAG_ROLL_PITCH_YAW_RATE = (VERTICAL_VELOCITY |
+                             HORIZONTAL_ANGLE |
+                             YAW_RATE |
+                             HORIZONTAL_BODY |
+                             STABLE_DISABLE)
+
 FLAG_ROLL_PITCH_YAW_THRUST = (VERTICAL_THRUST |
                               HORIZONTAL_ANGLE |
                               YAW_ANGLE |
@@ -81,13 +87,9 @@ FLAG_ROLL_PITCH_YAW_THRUST = (VERTICAL_THRUST |
 
 ALT_MIN = 0
 ALT_MAX = 20
-
-ALT_VEL_LIM = 5
-
-ROLL_ANGLE_LIM = 0.611
-PITCH_ANGLE_LIM = 0.611
-YAW_ANGLE_LIM = 3.1415
-
-YAW_RATE_LIM = 0.2652
-
-HOR_VEL_LIM = 30
+ALT_VEL_LIM = 5               # m/s (should this be 4?)
+ROLL_ANGLE_LIM = 0.611        # rad
+PITCH_ANGLE_LIM = 0.611       # rad
+YAW_ANGLE_LIM = 3.14159264    # rad
+YAW_RATE_LIM = 5/6*3.14159264 # rad/s
+HOR_VEL_LIM = 30              # m/s
